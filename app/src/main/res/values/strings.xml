@@ -68,7 +68,7 @@
     <string name="settings_contributors">Contributors</string>
     <string name="settings_media">Media</string>
     <string name="settings_glide_enable_cache">Enable cache</string>
-    <string name="settings_glide_enable_cache_content">This will enable glide\'s cache.</string>
+    <string name="settings_glide_enable_cache_content">This will enable glide\'s cache</string>
     <string name="dialog_album_info">Album Info</string>
     <string name="dialog_album_year">Year</string>
     <string name="library_view_filter">Filter</string>
