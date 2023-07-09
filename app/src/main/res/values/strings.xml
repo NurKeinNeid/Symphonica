@@ -1,25 +1,25 @@
 <!--
-  ~     Copyright (C) 2023 Akane Foundation
+  ~     Copyright (C) 2023  Akane Foundation
   ~
-  ~     This file is part of Symphonica.
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
   ~
-  ~     Symphonica is free software: you can redistribute it and/or modify it under the terms
-  ~     of the GNU General Public License as published by the Free Software Foundation,
-  ~     either version 3 of the License, or (at your option) any later version.
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
   ~
-  ~     Symphonica is distributed in the hope that it will be useful, but WITHOUT ANY
-  ~     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-  ~     FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-  ~
-  ~     You should have received a copy of the GNU General Public License along with
-  ~     Symphonica. If not, see <https://www.gnu.org/licenses/>.
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 
 <resources>
     <string name="app_name">Symphonica</string>
     <string name="default_album_number">0</string>
     <string name="default_play_time">0:00</string>
-    <string name="full_sheet_playlist_location">%1$s in %2$s song(s)</string>
+    <string name="full_sheet_playlist_location">%1$s in %2$s songs</string>
     <string name="playlist_metadata_information">%1$s • %2$s</string>
     <string name="library_album_view_album">Album</string>
     <string name="library_album_view_more_information">Information</string>
@@ -30,7 +30,7 @@
     <string name="library_tab_album">Album</string>
     <string name="library_tab_list">List</string>
     <string name="loading_your_library">Loading your library.</string>
-    <string name="navigation_view_all_song">All Songs</string>
+    <string name="navigation_view_all_song">Library</string>
     <string name="navigation_view_settings">Settings</string>
     <string name="navigation_view_subtitle">Welcome back!</string>
     <string name="settings_app_name">App Name</string>
@@ -93,4 +93,23 @@
     <string name="playlist_active_song">Active song</string>
     <string name="home_today_shuffle">Today\'s Shuffle</string>
     <string name="home_recent_added">Recently added</string>
+    <string name="home_history_view_title">History</string>
+    <string name="home_history_clear_all">Clear all</string>
+    <string name="home_history_counter_song">%1$s Song</string>
+    <string name="home_history_counter_songs">%1$s Songs</string>
+    <string name="settings_library_shuffle_button">Enable library shuffle button</string>
+    <string name="settings_library_shuffle_button_summary">Shuffle library with one click</string>
+    <string name="settings_colorful_buttons">Colorful buttons</string>
+    <string name="settings_colorful_buttons_summary">Use different colors for homepage buttons</string>
+    <string name="home_history_view_stub_title">0 Song</string>
+    <string name="home_playlist_view_add_playlist">Add playlist</string>
+    <string name="home_playlist_view_remove_playlist">Remove playlist</string>
+    <string name="home_playlist_add_view_title">Add playlist</string>
+    <string name="home_playlist_add_view_name_empty">Playlist name cannot be empty!</string>
+    <string name="home_playlist_add_view_playlist_name">Playlist name</string>
+    <string name="home_playlist_add_view_playlist_desc">Description</string>
+    <string name="unknown_playlist">Unknown playlist</string>
+    <string name="default_description">No description</string>
+    <string name="home_playlist_view_title">Playlist</string>
+    <string name="full_sheet_playlist_location_single">%1$s in %2$s song</string>
 </resources>

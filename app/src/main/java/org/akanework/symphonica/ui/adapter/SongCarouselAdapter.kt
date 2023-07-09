@@ -1,18 +1,18 @@
 /*
- *     Copyright (C) 2023 Akane Foundation
+ *     Copyright (C) 2023  Akane Foundation
  *
- *     This file is part of Symphonica.
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
  *
- *     Symphonica is free software: you can redistribute it and/or modify it under the terms
- *     of the GNU General Public License as published by the Free Software Foundation,
- *     either version 3 of the License, or (at your option) any later version.
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
  *
- *     Symphonica is distributed in the hope that it will be useful, but WITHOUT ANY
- *     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- *     FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License along with
- *     Symphonica. If not, see <https://www.gnu.org/licenses/>.
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.akanework.symphonica.ui.adapter
@@ -30,7 +30,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.akanework.symphonica.MainActivity
 import org.akanework.symphonica.MainActivity.Companion.booleanViewModel
 import org.akanework.symphonica.MainActivity.Companion.fullSheetShuffleButton
-import org.akanework.symphonica.MainActivity.Companion.playlistViewModel
 import org.akanework.symphonica.R
 import org.akanework.symphonica.SymphonicaApplication
 import org.akanework.symphonica.logic.data.Song
@@ -45,24 +44,13 @@ import org.akanework.symphonica.ui.fragment.LibraryAlbumDisplayFragment
  */
 class SongCarouselAdapter(private val songList: MutableList<Song>) :
     RecyclerView.Adapter<SongCarouselAdapter.ViewHolder>() {
-
-    /**
-     * Upon creation, viewbinding everything.
-     */
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val songCover: ImageView = view.findViewById(R.id.carousel_image_view)
-        val container: MaskableFrameLayout = view.findViewById(R.id.carousel_item_container)
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.home_carousel_card, parent, false)
         return ViewHolder(view)
     }
 
-    override fun getItemCount(): Int {
-        return songList.size
-    }
+    override fun getItemCount(): Int = songList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         Glide.with(holder.songCover.context)
@@ -71,16 +59,12 @@ class SongCarouselAdapter(private val songList: MutableList<Song>) :
             .placeholder(R.drawable.ic_song_outline_default_cover)
             .into(holder.songCover)
 
-        val tempSongList: MutableList<Song> = mutableListOf()
-        tempSongList.addAll(songList)
         holder.container.setOnClickListener {
-            playlistViewModel.currentLocation = holder.adapterPosition
-            playlistViewModel.playList = tempSongList
             if (booleanViewModel.shuffleState) {
                 booleanViewModel.shuffleState = false
                 fullSheetShuffleButton!!.isChecked = false
             }
-            replacePlaylist(playlistViewModel.playList, position)
+            replacePlaylist(songList, position)
         }
 
         holder.itemView.setOnLongClickListener {
@@ -101,11 +85,12 @@ class SongCarouselAdapter(private val songList: MutableList<Song>) :
             checkAlbumButton!!.setOnClickListener {
                 val albumBundle = Bundle().apply {
                     if (MainActivity.libraryViewModel.librarySortedAlbumList.isNotEmpty()) {
-                        putInt("Position", MainActivity.libraryViewModel.librarySortedAlbumList.indexOf(
-                            MainActivity.libraryViewModel.librarySortedAlbumList.find {
-                                it.songList.contains(songList[position])
-                            }
-                        ))
+                        putInt("Position",
+                            MainActivity.libraryViewModel.librarySortedAlbumList.indexOf(
+                                MainActivity.libraryViewModel.librarySortedAlbumList.find {
+                                    it.songList.contains(songList[position])
+                                }
+                            ))
                     } else {
                         putInt("Position", MainActivity.libraryViewModel.libraryAlbumList.indexOf(
                             MainActivity.libraryViewModel.libraryAlbumList.find {
@@ -135,7 +120,13 @@ class SongCarouselAdapter(private val songList: MutableList<Song>) :
 
             true
         }
-
     }
 
+    /**
+     * Upon creation, viewbinding everything.
+     */
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val songCover: ImageView = view.findViewById(R.id.carousel_image_view)
+        val container: MaskableFrameLayout = view.findViewById(R.id.carousel_item_container)
+    }
 }

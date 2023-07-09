@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~     Copyright (C) 2023 Akane Foundation
+  ~     Copyright (C) 2023  Akane Foundation
   ~
-  ~     This file is part of Symphonica.
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
   ~
-  ~     Symphonica is free software: you can redistribute it and/or modify it under the terms
-  ~     of the GNU General Public License as published by the Free Software Foundation,
-  ~     either version 3 of the License, or (at your option) any later version.
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
   ~
-  ~     Symphonica is distributed in the hope that it will be useful, but WITHOUT ANY
-  ~     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-  ~     FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-  ~
-  ~     You should have received a copy of the GNU General Public License along with
-  ~     Symphonica. If not, see <https://www.gnu.org/licenses/>.
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -47,7 +47,7 @@
                 android:layout_height="?attr/actionBarSize"
                 android:elevation="0dp"
                 app:layout_collapseMode="pin"
-                app:navigationIcon="@drawable/ic_library_music" />
+                app:navigationIcon="@drawable/ic_menu" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
@@ -65,19 +65,9 @@
             android:orientation="vertical"
             android:paddingTop="16dp">
 
-            <com.google.android.material.card.MaterialCardView
-                style="?attr/materialCardViewFilledStyle"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp">
-
-            </com.google.android.material.card.MaterialCardView>
-
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp">
+                android:layout_height="wrap_content">
 
                 <FrameLayout
                     android:layout_width="0dp"
@@ -95,12 +85,12 @@
                         android:insetTop="0dp"
                         android:insetRight="0dp"
                         android:insetBottom="0dp"
-                        app:backgroundTint="?attr/colorTertiaryContainer"
+                        app:backgroundTint="?attr/colorPrimaryContainer"
                         app:icon="@drawable/ic_shuffle"
                         app:iconGravity="textStart"
                         app:iconPadding="0dp"
                         app:iconSize="30sp"
-                        app:iconTint="?attr/colorOnTertiaryContainer" />
+                        app:iconTint="?attr/colorOnPrimaryContainer" />
                 </FrameLayout>
 
                 <FrameLayout
@@ -119,12 +109,12 @@
                         android:insetTop="0dp"
                         android:insetRight="0dp"
                         android:insetBottom="0dp"
-                        app:backgroundTint="?attr/colorSecondaryContainer"
+                        app:backgroundTint="?attr/colorPrimaryContainer"
                         app:icon="@drawable/ic_favourite"
                         app:iconGravity="textStart"
                         app:iconPadding="0dp"
                         app:iconSize="30sp"
-                        app:iconTint="?attr/colorOnSecondaryContainer" />
+                        app:iconTint="?attr/colorOnPrimaryContainer" />
                 </FrameLayout>
 
                 <FrameLayout
@@ -133,7 +123,7 @@
                     android:layout_weight="1">
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/home_like"
+                        android:id="@+id/home_history"
                         android:layout_width="64dp"
                         android:layout_height="64dp"
                         android:layout_gravity="center"
@@ -144,7 +134,7 @@
                         android:insetRight="0dp"
                         android:insetBottom="0dp"
                         app:backgroundTint="?attr/colorPrimaryContainer"
-                        app:icon="@drawable/ic_refresh"
+                        app:icon="@drawable/ic_history"
                         app:iconGravity="textStart"
                         app:iconPadding="0dp"
                         app:iconSize="30sp"
@@ -167,12 +157,12 @@
                         android:insetTop="0dp"
                         android:insetRight="0dp"
                         android:insetBottom="0dp"
-                        app:backgroundTint="?attr/colorTertiaryContainer"
+                        app:backgroundTint="?attr/colorPrimaryContainer"
                         app:icon="@drawable/ic_playlist"
                         app:iconGravity="textStart"
                         app:iconPadding="0dp"
                         app:iconSize="30sp"
-                        app:iconTint="?attr/colorOnTertiaryContainer" />
+                        app:iconTint="?attr/colorOnPrimaryContainer" />
                 </FrameLayout>
             </LinearLayout>
 

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~     Copyright (C) 2023 Akane Foundation
+  ~     Copyright (C) 2023  Akane Foundation
   ~
-  ~     This file is part of Symphonica.
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
   ~
-  ~     Symphonica is free software: you can redistribute it and/or modify it under the terms
-  ~     of the GNU General Public License as published by the Free Software Foundation,
-  ~     either version 3 of the License, or (at your option) any later version.
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
   ~
-  ~     Symphonica is distributed in the hope that it will be useful, but WITHOUT ANY
-  ~     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-  ~     FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-  ~
-  ~     You should have received a copy of the GNU General Public License along with
-  ~     Symphonica. If not, see <https://www.gnu.org/licenses/>.
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -39,7 +39,7 @@
             android:fitsSystemWindows="false"
             app:layout_scrollEffect="compress"
             app:layout_scrollFlags="scroll|enterAlways|snap"
-            app:navigationIcon="@drawable/ic_library_music"
+            app:navigationIcon="@drawable/ic_menu"
             app:title="@string/navigation_view_settings"
             app:titleCentered="true"
             app:titleTextAppearance="@style/ToolbarTitleStyle"
@@ -304,6 +304,47 @@
                 android:textStyle="bold" />
 
             <FrameLayout
+                android:id="@+id/akane_preference"
+                android:layout_width="match_parent"
+                android:layout_height="74dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:longClickable="true"
+                android:paddingStart="24dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="10dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_enable_akane"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_enable_akane_content"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+                </LinearLayout>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/akane_display_settings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|end"
+                    android:checked="true" />
+            </FrameLayout>
+
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="74dp"
                 android:background="?attr/selectableItemBackground"
@@ -313,6 +354,102 @@
                 android:paddingTop="10dp"
                 android:paddingEnd="24dp"
                 android:paddingBottom="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_colorful_buttons"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_colorful_buttons_summary"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+                </LinearLayout>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/home_colorful_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|end" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="74dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:longClickable="true"
+                android:paddingStart="24dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_library_shuffle_button"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_library_shuffle_button_summary"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+                </LinearLayout>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/library_shuffle_button_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|end" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="74dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:longClickable="true"
+                android:paddingStart="24dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_force_dark_mode"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_force_dark_mode_content"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -384,47 +521,6 @@
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/enable_list_shuffle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical|end"
-                    android:checked="true" />
-            </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/akane_preference"
-                android:layout_width="match_parent"
-                android:layout_height="74dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:longClickable="true"
-                android:paddingStart="24dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="24dp"
-                android:paddingBottom="10dp"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_enable_akane"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_enable_akane_content"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-                </LinearLayout>
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/akane_display_settings"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end"

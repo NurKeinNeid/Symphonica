@@ -1,18 +1,18 @@
 /*
- *     Copyright (C) 2023 Akane Foundation
+ *     Copyright (C) 2023  Akane Foundation
  *
- *     This file is part of Symphonica.
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
  *
- *     Symphonica is free software: you can redistribute it and/or modify it under the terms
- *     of the GNU General Public License as published by the Free Software Foundation,
- *     either version 3 of the License, or (at your option) any later version.
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
  *
- *     Symphonica is distributed in the hope that it will be useful, but WITHOUT ANY
- *     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- *     FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License along with
- *     Symphonica. If not, see <https://www.gnu.org/licenses/>.
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package org.akanework.symphonica.ui.fragment
@@ -34,10 +34,12 @@ import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.transition.MaterialSharedAxis
 import org.akanework.symphonica.BuildConfig
 import org.akanework.symphonica.MainActivity.Companion.isAkaneVisible
+import org.akanework.symphonica.MainActivity.Companion.isColorfulButtonEnabled
 import org.akanework.symphonica.MainActivity.Companion.isEasterEggDiscovered
 import org.akanework.symphonica.MainActivity.Companion.isForceDarkModeEnabled
 import org.akanework.symphonica.MainActivity.Companion.isForceLoadingEnabled
 import org.akanework.symphonica.MainActivity.Companion.isGlideCacheEnabled
+import org.akanework.symphonica.MainActivity.Companion.isLibraryShuffleButtonEnabled
 import org.akanework.symphonica.MainActivity.Companion.isListShuffleEnabled
 import org.akanework.symphonica.MainActivity.Companion.switchDrawer
 import org.akanework.symphonica.MainActivity.Companion.switchNavigationViewIndex
@@ -49,24 +51,22 @@ import org.akanework.symphonica.SymphonicaApplication
  * for settings.
  */
 class SettingsFragment : Fragment() {
-
     private var logoClickedTimes = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         exitTransition =
-            MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
+                MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
         reenterTransition =
-            MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
-
+                MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         // Inflate the layout for this fragment.
         val rootView = inflater.inflate(R.layout.fragment_settings, container, false)
 
@@ -74,19 +74,24 @@ class SettingsFragment : Fragment() {
         val topAppBar = rootView.findViewById<MaterialToolbar>(R.id.topAppBar)
         val versionTag = rootView.findViewById<TextView>(R.id.version_tag)
         val cacheSwitch = rootView.findViewById<MaterialSwitch>(R.id.cache_reading_switch)
+        val colorfulButtonSwitch = rootView.findViewById<MaterialSwitch>(R.id.home_colorful_button)
         val reorderSwitch = rootView.findViewById<MaterialSwitch>(R.id.reading_order_switch)
         val darkModeSwitch = rootView.findViewById<MaterialSwitch>(R.id.force_dark_mode_switch)
         val symphonicaIcon = rootView.findViewById<ImageView>(R.id.symphonica_icon)
         val akanePreference = rootView.findViewById<FrameLayout>(R.id.akane_preference)
         val akaneDisplaySwitch = rootView.findViewById<MaterialSwitch>(R.id.akane_display_settings)
+        val libraryShuffleButtonSwitch =
+            rootView.findViewById<MaterialSwitch>(R.id.library_shuffle_button_switch)
         val enableListShuffleSwitch =
             rootView.findViewById<MaterialSwitch>(R.id.enable_list_shuffle)
 
         cacheSwitch.isChecked = isGlideCacheEnabled
+        colorfulButtonSwitch.isChecked = isColorfulButtonEnabled
         reorderSwitch.isChecked = isForceLoadingEnabled
         darkModeSwitch.isChecked = isForceDarkModeEnabled
         enableListShuffleSwitch.isChecked = isListShuffleEnabled
         akaneDisplaySwitch.isChecked = isAkaneVisible
+        libraryShuffleButtonSwitch.isChecked = isLibraryShuffleButtonEnabled
 
         if (isEasterEggDiscovered) {
             akanePreference.visibility = VISIBLE
@@ -102,6 +107,21 @@ class SettingsFragment : Fragment() {
                 true
             } else {
                 editor.putBoolean("isGlideCacheEnabled", false)
+                editor.apply()
+                false
+            }
+        }
+
+        colorfulButtonSwitch.setOnCheckedChangeListener { _, isChecked ->
+            val editor =
+                SymphonicaApplication.context.getSharedPreferences("data", Context.MODE_PRIVATE)
+                    .edit()
+            isColorfulButtonEnabled = if (isChecked) {
+                editor.putBoolean("isColorfulButtonEnabled", true)
+                editor.apply()
+                true
+            } else {
+                editor.putBoolean("isColorfulButtonEnabled", false)
                 editor.apply()
                 false
             }
@@ -167,6 +187,21 @@ class SettingsFragment : Fragment() {
                 editor.putBoolean("isAkaneVisible", false)
                 editor.apply()
                 requireActivity().findViewById<ImageView>(R.id.akane).visibility = GONE
+                false
+            }
+        }
+
+        libraryShuffleButtonSwitch.setOnCheckedChangeListener { _, isChecked ->
+            val editor =
+                SymphonicaApplication.context.getSharedPreferences("data", Context.MODE_PRIVATE)
+                    .edit()
+            isLibraryShuffleButtonEnabled = if (isChecked) {
+                editor.putBoolean("isLibraryShuffleButtonEnabled", true)
+                editor.apply()
+                true
+            } else {
+                editor.putBoolean("isLibraryShuffleButtonEnabled", false)
+                editor.apply()
                 false
             }
         }
