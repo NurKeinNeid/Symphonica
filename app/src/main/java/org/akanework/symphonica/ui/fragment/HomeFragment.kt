@@ -23,32 +23,42 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.carousel.CarouselLayoutManager
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.transition.MaterialSharedAxis
 import org.akanework.symphonica.MainActivity
 import org.akanework.symphonica.MainActivity.Companion.customFragmentManager
 import org.akanework.symphonica.MainActivity.Companion.fullSheetLoopButton
 import org.akanework.symphonica.MainActivity.Companion.fullSheetShuffleButton
+import org.akanework.symphonica.MainActivity.Companion.isAkaneVisible
 import org.akanework.symphonica.MainActivity.Companion.isColorfulButtonEnabled
+import org.akanework.symphonica.MainActivity.Companion.isDrawerOpen
 import org.akanework.symphonica.MainActivity.Companion.isListShuffleEnabled
 import org.akanework.symphonica.MainActivity.Companion.libraryViewModel
 import org.akanework.symphonica.MainActivity.Companion.playlistViewModel
+import org.akanework.symphonica.MainActivity.Companion.switchDrawer
+import org.akanework.symphonica.PAGE_TRANSITION_DURATION
 import org.akanework.symphonica.R
 import org.akanework.symphonica.logic.data.Song
 import org.akanework.symphonica.logic.util.replacePlaylist
-import org.akanework.symphonica.ui.adapter.SongCarouselAdapter
+import org.akanework.symphonica.ui.adapter.SongHorizontalRecyclerViewAdapter
+import org.akanework.symphonica.ui.adapter.SongRecyclerViewAdapter
+import kotlin.math.abs
 
 /**
  * [HomeFragment] is homepage fragment.
@@ -57,8 +67,16 @@ class HomeFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        enterTransition =
+            MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(
+                PAGE_TRANSITION_DURATION)
+        returnTransition =
+            MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(
+                PAGE_TRANSITION_DURATION)
         reenterTransition =
-                MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
+            MaterialSharedAxis(MaterialSharedAxis.Z, /* forward= */ false).setDuration(
+                PAGE_TRANSITION_DURATION
+            )
     }
 
     override fun onCreateView(
@@ -69,14 +87,47 @@ class HomeFragment : Fragment() {
         // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_home, container, false)
 
+        var initialX = 0f
+
+        rootView.setOnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = event.x
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    view.performClick()
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val currentX = event.x
+                    val deltaX = currentX - initialX
+
+                    if (abs(deltaX) > 100) {
+                        if (deltaX > 0 && !isDrawerOpen) {
+                            switchDrawer()
+                        } else if (deltaX < 0 && isDrawerOpen) {
+                            switchDrawer()
+                        }
+                    }
+
+                    true
+                }
+                else -> false
+            }
+        }
+
+        if (isAkaneVisible) {
+            rootView.findViewById<ImageView>(R.id.akane).visibility = VISIBLE
+        }
+
         val topAppBar = rootView.findViewById<MaterialToolbar>(R.id.topAppBar)
         val shuffleRefreshButton = rootView.findViewById<MaterialButton>(R.id.refresh_shuffle_list)
         val collapsingToolbar =
             rootView.findViewById<CollapsingToolbarLayout>(R.id.collapsingToolbar)
         val appBarLayout = rootView.findViewById<AppBarLayout>(R.id.appBarLayout)
-        val shuffleCarouselRecyclerView =
+        val shuffleRecyclerView =
             rootView.findViewById<RecyclerView>(R.id.shuffle_recycler_view)
-        val recentCarouselRecyclerView =
+        val recentRecyclerView =
             rootView.findViewById<RecyclerView>(R.id.recent_recycler_view)
 
         val homeShuffleButton =
@@ -139,15 +190,17 @@ class HomeFragment : Fragment() {
             )
         }
 
-        val shuffleLayoutManager = CarouselLayoutManager()
-        shuffleCarouselRecyclerView.layoutManager = shuffleLayoutManager
-        shuffleAdapter = SongCarouselAdapter(shuffleList)
-        shuffleCarouselRecyclerView.adapter = shuffleAdapter
+        val shuffleLayoutManager = LinearLayoutManager(context)
+        shuffleLayoutManager.orientation = RecyclerView.HORIZONTAL
+        shuffleRecyclerView.layoutManager = shuffleLayoutManager
+        shuffleAdapter = SongRecyclerViewAdapter(shuffleList)
+        shuffleRecyclerView.adapter = shuffleAdapter
 
-        val recentLayoutManager = CarouselLayoutManager()
-        recentCarouselRecyclerView.layoutManager = recentLayoutManager
-        recentAdapter = SongCarouselAdapter(recentList)
-        recentCarouselRecyclerView.adapter = recentAdapter
+        val recentLayoutManager = StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL)
+        recentRecyclerView.layoutManager = recentLayoutManager
+        recentAdapter = SongHorizontalRecyclerViewAdapter(recentList)
+        recentRecyclerView.adapter = recentAdapter
+        LinearSnapHelper().attachToRecyclerView(recentRecyclerView)
 
         loadingPrompt = rootView.findViewById(R.id.loading_prompt_list)
 
@@ -194,7 +247,7 @@ class HomeFragment : Fragment() {
         topAppBar.setNavigationOnClickListener {
             // Allow open drawer if only initialization have been completed.
             if (isInitialized) {
-                MainActivity.switchDrawer()
+                switchDrawer()
             }
         }
 
@@ -233,8 +286,8 @@ class HomeFragment : Fragment() {
         private val recentList: MutableList<Song> = mutableListOf()
         private var isInitialized: Boolean = true
         private lateinit var loadingPrompt: MaterialCardView
-        private lateinit var shuffleAdapter: SongCarouselAdapter
-        private lateinit var recentAdapter: SongCarouselAdapter
+        private lateinit var shuffleAdapter: SongRecyclerViewAdapter
+        private lateinit var recentAdapter: SongHorizontalRecyclerViewAdapter
 
         /**
          * This is used for outer class to switch [loadingPrompt].
@@ -274,16 +327,14 @@ class HomeFragment : Fragment() {
 
         private fun initializeList() {
             if (shuffleList.isEmpty() && libraryViewModel.librarySongList.isNotEmpty()) {
-                shuffleList.add(libraryViewModel.librarySongList.random())
-                shuffleList.add(libraryViewModel.librarySongList.random())
-                shuffleList.add(libraryViewModel.librarySongList.random())
-                shuffleList.add(libraryViewModel.librarySongList.random())
-                shuffleList.add(libraryViewModel.librarySongList.random())
-                shuffleAdapter.notifyItemRangeChanged(0, 5)
+                for (i in 1..10) {
+                    shuffleList.add(libraryViewModel.librarySongList.random())
+                }
+                shuffleAdapter.notifyItemRangeChanged(0, 10)
             }
             if (libraryViewModel.libraryNewestAddedList.isNotEmpty() && recentList.isEmpty()) {
                 recentList.addAll(0, libraryViewModel.libraryNewestAddedList)
-                recentAdapter.notifyItemRangeChanged(0, 10)
+                recentAdapter.notifyItemRangeChanged(0, 12)
             }
         }
 
@@ -296,12 +347,10 @@ class HomeFragment : Fragment() {
                 shuffleList.clear()
             }
             if (libraryViewModel.librarySongList.isNotEmpty()) {
-                shuffleList.add(libraryViewModel.librarySongList.random())
-                shuffleList.add(libraryViewModel.librarySongList.random())
-                shuffleList.add(libraryViewModel.librarySongList.random())
-                shuffleList.add(libraryViewModel.librarySongList.random())
-                shuffleList.add(libraryViewModel.librarySongList.random())
-                shuffleAdapter.notifyItemRangeChanged(0, 5)
+                for (i in 1..10) {
+                    shuffleList.add(libraryViewModel.librarySongList.random())
+                }
+                shuffleAdapter.notifyItemRangeChanged(0, 10)
             }
         }
     }

@@ -19,9 +19,11 @@ package org.akanework.symphonica.ui.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.appbar.MaterialToolbar
@@ -30,15 +32,20 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.android.material.transition.MaterialSharedAxis
 import org.akanework.symphonica.MainActivity
+import org.akanework.symphonica.MainActivity.Companion.isAkaneVisible
 import org.akanework.symphonica.MainActivity.Companion.isLibraryShuffleButtonEnabled
 import org.akanework.symphonica.MainActivity.Companion.libraryViewModel
 import org.akanework.symphonica.MainActivity.Companion.switchDrawer
 import org.akanework.symphonica.MainActivity.Companion.switchNavigationViewIndex
+import org.akanework.symphonica.PAGE_TRANSITION_DURATION
 import org.akanework.symphonica.R
+import org.akanework.symphonica.TAB_ALBUM
+import org.akanework.symphonica.TAB_LIST
 import org.akanework.symphonica.logic.data.Song
 import org.akanework.symphonica.logic.util.replacePlaylist
 import org.akanework.symphonica.ui.adapter.NavFragmentPageAdapter
 import org.akanework.symphonica.ui.fragment.LibraryListFragment.Companion.updateRecyclerListViewOppositeOrder
+import kotlin.math.abs
 
 /**
  * [LibraryFragment] is the fragment that
@@ -53,12 +60,16 @@ class LibraryFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Set the transition animation.
-        exitTransition =
-                MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
+        enterTransition =
+            MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(
+                PAGE_TRANSITION_DURATION)
+        returnTransition =
+            MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(
+                PAGE_TRANSITION_DURATION)
         reenterTransition =
-                MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
+            MaterialSharedAxis(MaterialSharedAxis.Z, /* forward= */ false).setDuration(
+                PAGE_TRANSITION_DURATION
+            )
     }
 
     override fun onCreateView(
@@ -68,6 +79,39 @@ class LibraryFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment.
         val rootView = inflater.inflate(R.layout.fragment_library, container, false)
+
+        var initialX = 0f
+
+        rootView.setOnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = event.x
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    view.performClick()
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val currentX = event.x
+                    val deltaX = currentX - initialX
+
+                    if (abs(deltaX) > 100) {
+                        if (deltaX > 0 && !MainActivity.isDrawerOpen) {
+                            switchDrawer()
+                        } else if (deltaX < 0 && MainActivity.isDrawerOpen) {
+                            switchDrawer()
+                        }
+                    }
+
+                    true
+                }
+                else -> false
+            }
+        }
+
+        if (isAkaneVisible) {
+            rootView.findViewById<ImageView>(R.id.akane).visibility = VISIBLE
+        }
 
         val topAppBar: MaterialToolbar = rootView.findViewById(R.id.topAppBar)
         val libraryTabLayout: TabLayout = rootView.findViewById(R.id.library_tablayout)
@@ -129,8 +173,8 @@ class LibraryFragment : Fragment() {
 
         TabLayoutMediator(libraryTabLayout, fragmentPager) { tab, position ->
             tab.text = when (position) {
-                0 -> getString(R.string.library_tab_list)
-                1 -> getString(R.string.library_tab_album)
+                TAB_LIST -> getString(R.string.library_tab_list)
+                TAB_ALBUM -> getString(R.string.library_tab_album)
                 else -> "Unknown"
             }
         }.attach()

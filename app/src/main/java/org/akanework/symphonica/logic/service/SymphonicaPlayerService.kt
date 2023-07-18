@@ -32,18 +32,23 @@ import android.media.MediaMetadata
 import android.media.MediaPlayer
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
-
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.akanework.symphonica.LOCK_AUDIO_FOCUS_INTERVAL
 import org.akanework.symphonica.MainActivity
-import org.akanework.symphonica.MainActivity.Companion.booleanViewModel
+import org.akanework.symphonica.MainActivity.Companion.controllerViewModel
 import org.akanework.symphonica.MainActivity.Companion.fullSheetShuffleButton
 import org.akanework.symphonica.MainActivity.Companion.isListShuffleEnabled
 import org.akanework.symphonica.MainActivity.Companion.isMainActivityActive
@@ -59,18 +64,11 @@ import org.akanework.symphonica.logic.util.broadcastPlayStart
 import org.akanework.symphonica.logic.util.broadcastPlayStopped
 import org.akanework.symphonica.logic.util.broadcastSliderSeek
 import org.akanework.symphonica.logic.util.nextSong
-import org.akanework.symphonica.logic.util.pausePlayer
 import org.akanework.symphonica.logic.util.prevSong
-import org.akanework.symphonica.logic.util.resumePlayer
 import org.akanework.symphonica.logic.util.thisSong
 import org.akanework.symphonica.logic.util.userChangedPlayerStatus
 import org.akanework.symphonica.ui.component.PlaylistBottomSheet.Companion.updatePlaylistSheetLocation
-
 import kotlin.random.Random
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * [SymphonicaPlayerService] is the core of Symphonica.
@@ -98,6 +96,21 @@ import kotlinx.coroutines.withContext
 class SymphonicaPlayerService : Service(), MediaPlayer.OnPreparedListener {
     private var isAudioManagerInitialized = false
 
+    private fun pausePlayer() {
+        musicPlayer!!.pause()
+        broadcastPlayPaused()
+    }
+
+    private fun resumePlayer() {
+        musicPlayer!!.start()
+        requestAudioFocus()
+        broadcastPlayStart()
+        if (managerSymphonica!!.activeNotifications.isEmpty()) {
+            mediaSession.setCallback(mediaSessionCallback)
+        }
+        killMiniPlayer()
+    }
+
     /**
      * [focusChangeListener] is a listener build for [audioManager].
      *
@@ -109,15 +122,15 @@ class SymphonicaPlayerService : Service(), MediaPlayer.OnPreparedListener {
      */
     private val focusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
         when (focusChange) {
-            AudioManager.AUDIOFOCUS_LOSS -> if (!booleanViewModel.isSendingRequest) {
+            AudioManager.AUDIOFOCUS_LOSS -> if (!controllerViewModel.isSendingRequest) {
                 pausePlayer()
             }
 
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> if (!booleanViewModel.isSendingRequest) {
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> if (!controllerViewModel.isSendingRequest) {
                 pausePlayer()
             }
 
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> if (!booleanViewModel.isSendingRequest) {
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> if (!controllerViewModel.isSendingRequest) {
                 pausePlayer()
             }
 
@@ -126,6 +139,7 @@ class SymphonicaPlayerService : Service(), MediaPlayer.OnPreparedListener {
             }
         }
     }
+
     private val mediaSessionCallback = object : MediaSession.Callback() {
         override fun onSeekTo(pos: Long) {
             musicPlayer?.seekTo(pos.toInt())
@@ -215,11 +229,13 @@ class SymphonicaPlayerService : Service(), MediaPlayer.OnPreparedListener {
 
             "ACTION_PAUSE" -> if (musicPlayer != null && musicPlayer!!.isPlaying) {
                 musicPlayer!!.pause()
+                abandonAudioFocus()
                 broadcastPlayPaused()
             }
 
             "ACTION_RESUME" -> if (musicPlayer != null && !musicPlayer!!.isPlaying) {
                 musicPlayer!!.start()
+                requestAudioFocus()
                 broadcastPlayStart()
                 if (managerSymphonica!!.activeNotifications.isEmpty()) {
                     mediaSession.setCallback(mediaSessionCallback)
@@ -345,16 +361,17 @@ class SymphonicaPlayerService : Service(), MediaPlayer.OnPreparedListener {
         musicPlayer = null
         broadcastPlayStopped()
         broadcastMetaDataUpdate()
+        abandonAudioFocus()
     }
 
     private fun prevSongDecisionMaker() {
         val previousLocation = playlistViewModel.currentLocation
-        if (!isListShuffleEnabled && booleanViewModel.loopButtonStatus != 2) {
+        if (!isListShuffleEnabled && controllerViewModel.loopButtonStatus != 2) {
             playlistViewModel.currentLocation =
-                    if (playlistViewModel.currentLocation == 0 && booleanViewModel.loopButtonStatus == 1 &&
+                    if (playlistViewModel.currentLocation == 0 && controllerViewModel.loopButtonStatus == 1 &&
                             !fullSheetShuffleButton!!.isChecked) {
                         playlistViewModel.playList.size - 1
-                    } else if (playlistViewModel.currentLocation == 0 && booleanViewModel.loopButtonStatus == 0 &&
+                    } else if (playlistViewModel.currentLocation == 0 && controllerViewModel.loopButtonStatus == 0 &&
                             !fullSheetShuffleButton!!.isChecked) {
                         stopPlaying()
                         0
@@ -365,11 +382,11 @@ class SymphonicaPlayerService : Service(), MediaPlayer.OnPreparedListener {
                     } else {
                         0
                     }
-        } else if (booleanViewModel.loopButtonStatus != 2) {
+        } else if (controllerViewModel.loopButtonStatus != 2) {
             playlistViewModel.currentLocation =
-                    if (playlistViewModel.currentLocation == 0 && booleanViewModel.loopButtonStatus == 0) {
+                    if (playlistViewModel.currentLocation == 0 && controllerViewModel.loopButtonStatus == 0) {
                         playlistViewModel.playList.size - 1
-                    } else if (playlistViewModel.currentLocation == 0 && booleanViewModel.loopButtonStatus == 1) {
+                    } else if (playlistViewModel.currentLocation == 0 && controllerViewModel.loopButtonStatus == 1) {
                         stopPlaying()
                         0
                     } else {
@@ -384,13 +401,13 @@ class SymphonicaPlayerService : Service(), MediaPlayer.OnPreparedListener {
 
     private fun nextSongDecisionMaker() {
         val previousLocation = playlistViewModel.currentLocation
-        if (!isListShuffleEnabled && booleanViewModel.loopButtonStatus != 2) {
+        if (!isListShuffleEnabled && controllerViewModel.loopButtonStatus != 2) {
             playlistViewModel.currentLocation =
-                    if (playlistViewModel.currentLocation == playlistViewModel.playList.size - 1 && booleanViewModel
+                    if (playlistViewModel.currentLocation == playlistViewModel.playList.size - 1 && controllerViewModel
                         .loopButtonStatus == 1 && !fullSheetShuffleButton!!.isChecked) {
                         0
                     } else if (playlistViewModel.currentLocation == playlistViewModel.playList.size - 1 &&
-                            booleanViewModel
+                            controllerViewModel
                                 .loopButtonStatus == 0 && !fullSheetShuffleButton!!.isChecked) {
                         stopPlaying()
                         0
@@ -402,14 +419,14 @@ class SymphonicaPlayerService : Service(), MediaPlayer.OnPreparedListener {
                     } else {
                         0
                     }
-        } else if (booleanViewModel.loopButtonStatus != 2) {
+        } else if (controllerViewModel.loopButtonStatus != 2) {
             playlistViewModel.currentLocation =
                     if (playlistViewModel.currentLocation == playlistViewModel.playList.size - 1 &&
-                            booleanViewModel.loopButtonStatus == 1
+                            controllerViewModel.loopButtonStatus == 1
                     ) {
                         0
                     } else if (playlistViewModel.currentLocation == playlistViewModel.playList.size - 1 &&
-                            booleanViewModel.loopButtonStatus == 0
+                            controllerViewModel.loopButtonStatus == 0
                     ) {
                         stopPlaying()
                         0
@@ -420,19 +437,24 @@ class SymphonicaPlayerService : Service(), MediaPlayer.OnPreparedListener {
         updatePlaylistSheetLocation(previousLocation)
     }
 
+    private val audioFocusRequest: AudioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+        .setOnAudioFocusChangeListener(focusChangeListener)
+        .build()
+
     private fun requestAudioFocus() {
         userRequestedAudioFocus = true
-        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setOnAudioFocusChangeListener(focusChangeListener)
-            .build()
-        booleanViewModel.isSendingRequest = true
+        controllerViewModel.isSendingRequest = true
         val handler = Handler(Looper.getMainLooper())
         val runnable = Runnable {
-            booleanViewModel.isSendingRequest = false
+            controllerViewModel.isSendingRequest = false
         }
-        handler.postDelayed(runnable, 50)
+        handler.postDelayed(runnable, LOCK_AUDIO_FOCUS_INTERVAL)
 
         audioManager.requestAudioFocus(audioFocusRequest)
+    }
+
+    private fun abandonAudioFocus() {
+        audioManager.abandonAudioFocusRequest(audioFocusRequest)
     }
 
     companion object {
@@ -448,6 +470,8 @@ class SymphonicaPlayerService : Service(), MediaPlayer.OnPreparedListener {
             .setActions()
             .build()
         lateinit var playbackStateBuilder: PlaybackState.Builder
+        var timer: CountDownTimer? = null
+        var timerValue: Float = 0f
 
         /**
          * [setPlaybackState] sets the playback state of the
@@ -459,13 +483,13 @@ class SymphonicaPlayerService : Service(), MediaPlayer.OnPreparedListener {
         fun setPlaybackState(operation: Int) {
             when (operation) {
 
-                0 -> playbackStateBuilder.setState(
+                OPERATION_PLAY -> playbackStateBuilder.setState(
                     PlaybackState.STATE_PLAYING,
                     musicPlayer!!.currentPosition.toLong(),
                     1.0f
                 )
 
-                1 -> playbackStateBuilder.setState(
+                OPERATION_PAUSE -> playbackStateBuilder.setState(
                     PlaybackState.STATE_PAUSED,
                     musicPlayer?.let {
                         musicPlayer!!.currentPosition.toLong()
@@ -477,6 +501,9 @@ class SymphonicaPlayerService : Service(), MediaPlayer.OnPreparedListener {
             }
             mediaSession.setPlaybackState(playbackStateBuilder.build())
         }
+
+        const val OPERATION_PLAY = 0
+        const val OPERATION_PAUSE = 1
 
         /**
          * [updateMetadata] is used for [notification] to update its

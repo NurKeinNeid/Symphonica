@@ -47,6 +47,18 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <ImageView
+        android:id="@+id/akane"
+        android:layout_width="300dp"
+        android:layout_height="468dp"
+        android:layout_marginBottom="-150dp"
+        android:layout_gravity="bottom|start"
+        android:importantForAccessibility="no"
+        android:src="@drawable/akane"
+        android:tintMode="src_atop"
+        android:visibility="gone"
+        app:tint="?attr/colorOutline" />
+
     <!-- Note: A RecyclerView can also be used -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/NestedScrollView"
@@ -415,6 +427,44 @@
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/library_shuffle_button_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|end" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="74dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:longClickable="true"
+                android:paddingStart="24dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_enable_squiggly_progress_bar"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_enable_squiggly_progress_bar_summary"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+                </LinearLayout>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/enable_squiggly_progress_bar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical|end" />

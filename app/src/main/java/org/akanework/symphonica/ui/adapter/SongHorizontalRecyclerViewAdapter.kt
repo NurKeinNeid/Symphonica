@@ -26,64 +26,49 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.akanework.symphonica.MainActivity
 import org.akanework.symphonica.MainActivity.Companion.controllerViewModel
-import org.akanework.symphonica.MainActivity.Companion.diskCacheStrategyCustom
 import org.akanework.symphonica.MainActivity.Companion.fullSheetShuffleButton
-import org.akanework.symphonica.MainActivity.Companion.libraryViewModel
-import org.akanework.symphonica.MainActivity.Companion.playlistViewModel
 import org.akanework.symphonica.R
 import org.akanework.symphonica.SymphonicaApplication
 import org.akanework.symphonica.logic.data.Song
 import org.akanework.symphonica.logic.util.addToNext
 import org.akanework.symphonica.logic.util.broadcastMetaDataUpdate
-import org.akanework.symphonica.logic.util.convertDurationToTimeStamp
 import org.akanework.symphonica.logic.util.replacePlaylist
 import org.akanework.symphonica.ui.fragment.LibraryAlbumDisplayFragment
 
 /**
- * [LibraryListAdapter] is the adapter for the library
- * list fragment.
+ * This is the carousel adapter used for
+ * songs.
  */
-class LibraryListAdapter(private val songList: List<Song>) :
-    RecyclerView.Adapter<LibraryListAdapter.ViewHolder>() {
+class SongHorizontalRecyclerViewAdapter(private val songList: MutableList<Song>) :
+    RecyclerView.Adapter<SongHorizontalRecyclerViewAdapter.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.library_list_card, parent, false)
+            .inflate(R.layout.home_carousel_card_recent, parent, false)
         return ViewHolder(view)
     }
 
     override fun getItemCount(): Int = songList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.songTitle.text = songList[position].title
-        holder.songMeta.text = SymphonicaApplication.context.getString(
-            R.string.library_list_metadata,
-            songList[position].artist,
-            songList[position].album
-        )
-        holder.songDuration.text =
-                convertDurationToTimeStamp(songList[position].duration.toString())
+        Glide.with(holder.songCover.context)
+            .load(songList[position].imgUri)
+            .diskCacheStrategy(MainActivity.diskCacheStrategyCustom)
+            .placeholder(R.drawable.ic_song_outline_default_cover)
+            .into(holder.songCover)
 
-        try {
-            Glide.with(holder.songCover.context)
-                .load(songList[position].imgUri)
-                .diskCacheStrategy(diskCacheStrategyCustom)
-                .placeholder(R.drawable.ic_song_default_cover)
-                .into(holder.songCover)
-        } catch (_: Exception) {
-            // Placeholder
-        }
+        holder.songName.text = songList[position].title
+        holder.songAuthor.text = songList[position].artist
 
-        holder.itemView.setOnClickListener {
+        holder.container.setOnClickListener {
             if (controllerViewModel.shuffleState) {
                 controllerViewModel.shuffleState = false
                 fullSheetShuffleButton!!.isChecked = false
-                playlistViewModel.originalPlaylist.clear()
             }
-            replacePlaylist(songList.toMutableList(), position)
-            playlistViewModel.currentLocation = position
+            replacePlaylist(songList, position)
         }
 
         holder.itemView.setOnLongClickListener {
@@ -103,15 +88,16 @@ class LibraryListAdapter(private val songList: List<Song>) :
 
             checkAlbumButton!!.setOnClickListener {
                 val albumBundle = Bundle().apply {
-                    if (libraryViewModel.librarySortedAlbumList.isNotEmpty()) {
-                        putInt("Position", libraryViewModel.librarySortedAlbumList.indexOf(
-                            libraryViewModel.librarySortedAlbumList.find {
-                                it.songList.contains(songList[position])
-                            }
-                        ))
+                    if (MainActivity.libraryViewModel.librarySortedAlbumList.isNotEmpty()) {
+                        putInt("Position",
+                            MainActivity.libraryViewModel.librarySortedAlbumList.indexOf(
+                                MainActivity.libraryViewModel.librarySortedAlbumList.find {
+                                    it.songList.contains(songList[position])
+                                }
+                            ))
                     } else {
-                        putInt("Position", libraryViewModel.libraryAlbumList.indexOf(
-                            libraryViewModel.libraryAlbumList.find {
+                        putInt("Position", MainActivity.libraryViewModel.libraryAlbumList.indexOf(
+                            MainActivity.libraryViewModel.libraryAlbumList.find {
                                 it.songList.contains(songList[position])
                             }
                         ))
@@ -144,9 +130,9 @@ class LibraryListAdapter(private val songList: List<Song>) :
      * Upon creation, viewbinding everything.
      */
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val songCover: ImageView = view.findViewById(R.id.song_cover)
-        val songTitle: TextView = view.findViewById(R.id.song_title)
-        val songMeta: TextView = view.findViewById(R.id.song_meta)
-        val songDuration: TextView = view.findViewById(R.id.song_duration)
+        val songCover: ImageView = view.findViewById(R.id.carousel_image_view)
+        val container: MaterialCardView = view.findViewById(R.id.carousel_item_container)
+        val songName: TextView = view.findViewById(R.id.carousel_song_name)
+        val songAuthor: TextView = view.findViewById(R.id.carousel_author_name)
     }
 }

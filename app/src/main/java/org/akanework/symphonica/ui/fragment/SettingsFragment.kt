@@ -20,6 +20,7 @@ package org.akanework.symphonica.ui.fragment
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -33,6 +34,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.transition.MaterialSharedAxis
 import org.akanework.symphonica.BuildConfig
+import org.akanework.symphonica.MainActivity
 import org.akanework.symphonica.MainActivity.Companion.isAkaneVisible
 import org.akanework.symphonica.MainActivity.Companion.isColorfulButtonEnabled
 import org.akanework.symphonica.MainActivity.Companion.isEasterEggDiscovered
@@ -41,10 +43,14 @@ import org.akanework.symphonica.MainActivity.Companion.isForceLoadingEnabled
 import org.akanework.symphonica.MainActivity.Companion.isGlideCacheEnabled
 import org.akanework.symphonica.MainActivity.Companion.isLibraryShuffleButtonEnabled
 import org.akanework.symphonica.MainActivity.Companion.isListShuffleEnabled
+import org.akanework.symphonica.MainActivity.Companion.isSquigglyProgressBarEnabled
 import org.akanework.symphonica.MainActivity.Companion.switchDrawer
 import org.akanework.symphonica.MainActivity.Companion.switchNavigationViewIndex
+import org.akanework.symphonica.PAGE_TRANSITION_DURATION
 import org.akanework.symphonica.R
 import org.akanework.symphonica.SymphonicaApplication
+import org.akanework.symphonica.logic.util.broadcastSquigglyUpdate
+import kotlin.math.abs
 
 /**
  * [SettingsFragment] is the fragment that is used
@@ -55,11 +61,16 @@ class SettingsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        exitTransition =
-                MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(500)
+        enterTransition =
+            MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(
+                PAGE_TRANSITION_DURATION)
+        returnTransition =
+            MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(
+                PAGE_TRANSITION_DURATION)
         reenterTransition =
-                MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(500)
+            MaterialSharedAxis(MaterialSharedAxis.Z, /* forward= */ false).setDuration(
+                PAGE_TRANSITION_DURATION
+            )
     }
 
     override fun onCreateView(
@@ -69,6 +80,39 @@ class SettingsFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment.
         val rootView = inflater.inflate(R.layout.fragment_settings, container, false)
+
+        var initialX = 0f
+
+        rootView.setOnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = event.x
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    view.performClick()
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val currentX = event.x
+                    val deltaX = currentX - initialX
+
+                    if (abs(deltaX) > 100) {
+                        if (deltaX > 0 && !MainActivity.isDrawerOpen) {
+                            switchDrawer()
+                        } else if (deltaX < 0 && MainActivity.isDrawerOpen) {
+                            switchDrawer()
+                        }
+                    }
+
+                    true
+                }
+                else -> false
+            }
+        }
+
+        if (isAkaneVisible) {
+            rootView.findViewById<ImageView>(R.id.akane).visibility = VISIBLE
+        }
 
         // Define the topAppBar behavior.
         val topAppBar = rootView.findViewById<MaterialToolbar>(R.id.topAppBar)
@@ -84,6 +128,8 @@ class SettingsFragment : Fragment() {
             rootView.findViewById<MaterialSwitch>(R.id.library_shuffle_button_switch)
         val enableListShuffleSwitch =
             rootView.findViewById<MaterialSwitch>(R.id.enable_list_shuffle)
+        val enableSquigglyProgressbarSwitch =
+            rootView.findViewById<MaterialSwitch>(R.id.enable_squiggly_progress_bar)
 
         cacheSwitch.isChecked = isGlideCacheEnabled
         colorfulButtonSwitch.isChecked = isColorfulButtonEnabled
@@ -92,6 +138,7 @@ class SettingsFragment : Fragment() {
         enableListShuffleSwitch.isChecked = isListShuffleEnabled
         akaneDisplaySwitch.isChecked = isAkaneVisible
         libraryShuffleButtonSwitch.isChecked = isLibraryShuffleButtonEnabled
+        enableSquigglyProgressbarSwitch.isChecked = isSquigglyProgressBarEnabled
 
         if (isEasterEggDiscovered) {
             akanePreference.visibility = VISIBLE
@@ -170,6 +217,23 @@ class SettingsFragment : Fragment() {
             } else {
                 editor.putBoolean("isListShuffleEnabled", false)
                 editor.apply()
+                false
+            }
+        }
+
+        enableSquigglyProgressbarSwitch.setOnCheckedChangeListener { _, isChecked ->
+            val editor =
+                SymphonicaApplication.context.getSharedPreferences("data", Context.MODE_PRIVATE)
+                    .edit()
+            isSquigglyProgressBarEnabled = if (isChecked) {
+                editor.putBoolean("isSquigglyProgressBarEnabled", true)
+                editor.apply()
+                broadcastSquigglyUpdate()
+                true
+            } else {
+                editor.putBoolean("isSquigglyProgressBarEnabled", false)
+                editor.apply()
+                broadcastSquigglyUpdate()
                 false
             }
         }

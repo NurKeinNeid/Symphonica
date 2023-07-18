@@ -23,12 +23,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.google.android.material.carousel.MaskableFrameLayout
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.akanework.symphonica.MainActivity
-import org.akanework.symphonica.MainActivity.Companion.booleanViewModel
+import org.akanework.symphonica.MainActivity.Companion.controllerViewModel
 import org.akanework.symphonica.MainActivity.Companion.fullSheetShuffleButton
 import org.akanework.symphonica.R
 import org.akanework.symphonica.SymphonicaApplication
@@ -42,8 +43,8 @@ import org.akanework.symphonica.ui.fragment.LibraryAlbumDisplayFragment
  * This is the carousel adapter used for
  * songs.
  */
-class SongCarouselAdapter(private val songList: MutableList<Song>) :
-    RecyclerView.Adapter<SongCarouselAdapter.ViewHolder>() {
+class SongRecyclerViewAdapter(private val songList: MutableList<Song>) :
+    RecyclerView.Adapter<SongRecyclerViewAdapter.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.home_carousel_card, parent, false)
@@ -59,12 +60,16 @@ class SongCarouselAdapter(private val songList: MutableList<Song>) :
             .placeholder(R.drawable.ic_song_outline_default_cover)
             .into(holder.songCover)
 
+        holder.songName.text = songList[position].title
+
         holder.container.setOnClickListener {
-            if (booleanViewModel.shuffleState) {
-                booleanViewModel.shuffleState = false
+            if (controllerViewModel.shuffleState) {
+                controllerViewModel.shuffleState = false
                 fullSheetShuffleButton!!.isChecked = false
             }
-            replacePlaylist(songList, position)
+            val dummyList: MutableList<Song> = mutableListOf()
+            dummyList.addAll(songList)
+            replacePlaylist(dummyList, position)
         }
 
         holder.itemView.setOnLongClickListener {
@@ -127,6 +132,7 @@ class SongCarouselAdapter(private val songList: MutableList<Song>) :
      */
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val songCover: ImageView = view.findViewById(R.id.carousel_image_view)
-        val container: MaskableFrameLayout = view.findViewById(R.id.carousel_item_container)
+        val container: MaterialCardView = view.findViewById(R.id.carousel_item_container)
+        val songName: TextView = view.findViewById(R.id.carousel_song_name)
     }
 }

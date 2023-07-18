@@ -32,11 +32,11 @@ import android.os.Looper
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.slider.Slider
 import com.google.android.material.textfield.TextInputEditText
 import org.akanework.symphonica.logic.data.Song
@@ -64,28 +64,35 @@ class MiniPlayerActivity : AppCompatActivity() {
             if (mediaPlayer.isPlaying) {
                 slider.isEnabled = true
 
-                slider.valueTo = mediaPlayer.duration.toFloat() / 1000
+                val valueTo = mediaPlayer.duration.toFloat() / PLAYER_SLIDER_VALUE_MULTIPLE
+                if (valueTo < slider.value) {
+                    slider.value = 0f
+                }
+                slider.valueTo = valueTo
 
                 if (!isUserTracking) {
-                    slider.value = mediaPlayer.currentPosition.toFloat() / 1000
+                    val addVar = mediaPlayer.currentPosition.toFloat() / PLAYER_SLIDER_VALUE_MULTIPLE
+                    if (addVar <= slider.valueTo) {
+                        slider.value = addVar
+                    }
                     timeStamp.text =
                             convertDurationToTimeStamp(mediaPlayer.currentPosition.toString())
                 }
 
-                controlButton.setImageResource(R.drawable.ic_pause)
-                handler.postDelayed(this, 200)
+                controlButton.icon = ContextCompat.getDrawable(SymphonicaApplication.context, R.drawable.ic_pause)
+                handler.postDelayed(this, SLIDER_UPDATE_INTERVAL)
             } else if (mediaPlayer.currentPosition >= mediaPlayer.duration - 1000) {
                 slider.isEnabled = false
-                controlButton.setImageResource(R.drawable.ic_sheet_play)
+                controlButton.icon = ContextCompat.getDrawable(SymphonicaApplication.context, R.drawable.ic_sheet_play)
             } else {
-                controlButton.setImageResource(R.drawable.ic_sheet_play)
+                controlButton.icon = ContextCompat.getDrawable(SymphonicaApplication.context, R.drawable.ic_sheet_play)
             }
         }
     }
     private lateinit var receiveKill: KillReceiver
     private lateinit var slider: Slider
     private lateinit var timeStamp: TextView
-    private lateinit var controlButton: FloatingActionButton
+    private lateinit var controlButton: MaterialButton
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,12 +114,6 @@ class MiniPlayerActivity : AppCompatActivity() {
                 IntentFilter("internal.play_mini_player_stop")
             )
         }
-
-        // Kill the main player
-        val intentKill = Intent(this, SymphonicaPlayerService::class.java).apply {
-            action = "ACTION_PAUSE"
-        }
-        this.startService(intentKill)
 
         val tempSongList: List<Song> = getAllSongs(applicationContext)
 
@@ -162,7 +163,7 @@ class MiniPlayerActivity : AppCompatActivity() {
                             // when the number is too big (like when toValue
                             // used the duration directly) we might encounter
                             // some performance problem.
-                            mediaPlayer.seekTo((slider.value * 1000).toInt())
+                            mediaPlayer.seekTo((slider.value * PLAYER_SLIDER_VALUE_MULTIPLE).toInt())
                             isUserTracking = false
                         }
                     }
@@ -173,7 +174,7 @@ class MiniPlayerActivity : AppCompatActivity() {
                 slider.addOnChangeListener { _, value, fromUser ->
                     if (fromUser) {
                         timeStamp.text =
-                                convertDurationToTimeStamp((value * 1000).toInt().toString())
+                                convertDurationToTimeStamp((value * PLAYER_SLIDER_VALUE_MULTIPLE).toInt().toString())
                     }
                 }
                 dialogButton.setOnClickListener {
@@ -211,14 +212,14 @@ class MiniPlayerActivity : AppCompatActivity() {
                 controlButton.setOnClickListener {
                     if (mediaPlayer.isPlaying) {
                         mediaPlayer.pause()
-                        controlButton.setImageResource(R.drawable.ic_sheet_play)
+                        controlButton.icon = ContextCompat.getDrawable(SymphonicaApplication.context, R.drawable.ic_sheet_play)
                     } else {
                         mediaPlayer.start()
-                        handler.postDelayed(sliderTask, 500)
-                        controlButton.setImageResource(R.drawable.ic_pause)
+                        handler.postDelayed(sliderTask, SLIDER_UPDATE_INTERVAL)
+                        controlButton.icon = ContextCompat.getDrawable(SymphonicaApplication.context, R.drawable.ic_pause)
                     }
                 }
-                handler.postDelayed(sliderTask, 500)
+                handler.postDelayed(sliderTask, SLIDER_UPDATE_INTERVAL)
             }
         }
         onBackPressedDispatcher.addCallback(

@@ -6,16 +6,16 @@ plugins {
 
 android {
     namespace 'org.akanework.symphonica'
-    compileSdk 33
+    compileSdk 34
 
     android.buildFeatures.buildConfig true
 
     defaultConfig {
         applicationId "org.akanework.symphonica"
         minSdk 29
-        targetSdk 33
-        versionCode 1
-        versionName "0.57b"
+        targetSdk 34
+        versionCode 5
+        versionName "0.5.9.indev.3"
     }
 
     buildTypes {
