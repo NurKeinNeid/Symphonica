@@ -17,10 +17,10 @@
 
 <resources>
     <string name="app_name">Symphonica</string>
-    <string name="default_album_number" translatable="false">•</string>
+    <string name="default_album_number" translatable="false">0</string>
     <string name="default_play_time" translatable="false">0:00</string>
     <string name="full_sheet_playlist_location">%1$s in %2$s songs</string>
-    <string name="playlist_metadata_information">%1$s • %2$s</string>
+    <string name="playlist_metadata_information" translatable="false">%1$s • %2$s</string>
     <string name="library_album_view_album">Album</string>
     <string name="library_album_view_more_information">Information</string>
     <string name="library_album_view_unknown_album">Unknown Album</string>
@@ -35,7 +35,7 @@
     <string name="navigation_view_subtitle">Welcome back!</string>
     <string name="settings_app_name">App Name</string>
     <string name="settings_version">Version</string>
-    <string name="settings_version_format">%1$s(%2$s)</string>
+    <string name="settings_version_format" translatable="false">%1$s(%2$s)</string>
     <string name="settings_version_tag">Unknown Version (Unknown VSC Version)</string>
     <string name="sheet_no_playing">No Song Playing</string>
     <string name="sheet_now_playing">Now Playing</string>
@@ -64,7 +64,8 @@
     <string name="library_album_view_shuffle">Shuffle</string>
     <string name="library_album_view_album_art">Album art</string>
     <string name="settings_symphonica_icon">Symphonica Icon</string>
-    <string name="settings_contributors_content">AkaneTan, Nift4, NurKeinNeid (Alphabetic Order)</string>
+    <string name="settings_contributors_content" translatable="false">AkaneTan, CrisBalGreece, Nift4, NurKeinNeid</string>
+    <string name="settings_contributors_content_alphabet">(Alphabetic Order)</string>
     <string name="settings_contributors">Contributors</string>
     <string name="settings_media">Media</string>
     <string name="settings_glide_enable_cache">Enable cache</string>
@@ -115,4 +116,6 @@
     <string name="settings_enable_squiggly_progress_bar">Enable squiggly progress bar</string>
     <string name="settings_enable_squiggly_progress_bar_summary">Come up with the flow</string>
     <string name="dialog_timer_title">Timer</string>
+    <string name="add_widget">Add widget</string>
+    <string name="app_widget_description">Control Symphonica at your homepage!</string>
 </resources>

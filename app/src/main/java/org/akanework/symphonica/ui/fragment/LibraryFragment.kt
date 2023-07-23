@@ -19,7 +19,6 @@ package org.akanework.symphonica.ui.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.View.VISIBLE
 import android.view.ViewGroup
@@ -45,7 +44,6 @@ import org.akanework.symphonica.logic.data.Song
 import org.akanework.symphonica.logic.util.replacePlaylist
 import org.akanework.symphonica.ui.adapter.NavFragmentPageAdapter
 import org.akanework.symphonica.ui.fragment.LibraryListFragment.Companion.updateRecyclerListViewOppositeOrder
-import kotlin.math.abs
 
 /**
  * [LibraryFragment] is the fragment that
@@ -58,20 +56,6 @@ import kotlin.math.abs
 class LibraryFragment : Fragment() {
     private lateinit var fragmentPager: ViewPager2
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enterTransition =
-            MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(
-                PAGE_TRANSITION_DURATION)
-        returnTransition =
-            MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(
-                PAGE_TRANSITION_DURATION)
-        reenterTransition =
-            MaterialSharedAxis(MaterialSharedAxis.Z, /* forward= */ false).setDuration(
-                PAGE_TRANSITION_DURATION
-            )
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -79,35 +63,6 @@ class LibraryFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment.
         val rootView = inflater.inflate(R.layout.fragment_library, container, false)
-
-        var initialX = 0f
-
-        rootView.setOnTouchListener { view, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    initialX = event.x
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    view.performClick()
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    val currentX = event.x
-                    val deltaX = currentX - initialX
-
-                    if (abs(deltaX) > 100) {
-                        if (deltaX > 0 && !MainActivity.isDrawerOpen) {
-                            switchDrawer()
-                        } else if (deltaX < 0 && MainActivity.isDrawerOpen) {
-                            switchDrawer()
-                        }
-                    }
-
-                    true
-                }
-                else -> false
-            }
-        }
 
         if (isAkaneVisible) {
             rootView.findViewById<ImageView>(R.id.akane).visibility = VISIBLE
@@ -168,8 +123,8 @@ class LibraryFragment : Fragment() {
 
         fragmentPager.adapter = NavFragmentPageAdapter(requireActivity())
 
-        // Set the offscreenPageLimit to 2 to avoid stuttering.
-        fragmentPager.offscreenPageLimit = 2
+        // Set the offscreenPageLimit to 1 to avoid stuttering.
+        fragmentPager.offscreenPageLimit = 1
 
         TabLayoutMediator(libraryTabLayout, fragmentPager) { tab, position ->
             tab.text = when (position) {

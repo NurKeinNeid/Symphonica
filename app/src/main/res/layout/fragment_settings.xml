@@ -108,7 +108,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="74dp"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:longClickable="true"
@@ -141,7 +141,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="74dp"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:longClickable="true"
@@ -176,7 +176,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="74dp"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:longClickable="true"
@@ -200,9 +200,9 @@
                         android:textSize="18sp" />
 
                     <TextView
+                        android:id="@+id/contributors"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/settings_contributors_content"
                         android:textColor="?attr/colorOnSurfaceVariant" />
                 </LinearLayout>
 
@@ -220,7 +220,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="74dp"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:longClickable="true"
@@ -269,7 +269,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="74dp"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:longClickable="true"
@@ -318,7 +318,7 @@
             <FrameLayout
                 android:id="@+id/akane_preference"
                 android:layout_width="match_parent"
-                android:layout_height="74dp"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:longClickable="true"
@@ -358,7 +358,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="74dp"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:longClickable="true"
@@ -396,7 +396,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="74dp"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:longClickable="true"
@@ -434,7 +434,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="74dp"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:longClickable="true"
@@ -472,7 +472,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="74dp"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:longClickable="true"
@@ -540,7 +540,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="74dp"
+                android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:longClickable="true"

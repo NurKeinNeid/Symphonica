@@ -20,7 +20,6 @@ package org.akanework.symphonica.ui.fragment
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -34,7 +33,6 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.transition.MaterialSharedAxis
 import org.akanework.symphonica.BuildConfig
-import org.akanework.symphonica.MainActivity
 import org.akanework.symphonica.MainActivity.Companion.isAkaneVisible
 import org.akanework.symphonica.MainActivity.Companion.isColorfulButtonEnabled
 import org.akanework.symphonica.MainActivity.Companion.isEasterEggDiscovered
@@ -50,7 +48,6 @@ import org.akanework.symphonica.PAGE_TRANSITION_DURATION
 import org.akanework.symphonica.R
 import org.akanework.symphonica.SymphonicaApplication
 import org.akanework.symphonica.logic.util.broadcastSquigglyUpdate
-import kotlin.math.abs
 
 /**
  * [SettingsFragment] is the fragment that is used
@@ -58,20 +55,6 @@ import kotlin.math.abs
  */
 class SettingsFragment : Fragment() {
     private var logoClickedTimes = 0
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enterTransition =
-            MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ true).setDuration(
-                PAGE_TRANSITION_DURATION)
-        returnTransition =
-            MaterialSharedAxis(MaterialSharedAxis.X, /* forward= */ false).setDuration(
-                PAGE_TRANSITION_DURATION)
-        reenterTransition =
-            MaterialSharedAxis(MaterialSharedAxis.Z, /* forward= */ false).setDuration(
-                PAGE_TRANSITION_DURATION
-            )
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -81,35 +64,6 @@ class SettingsFragment : Fragment() {
         // Inflate the layout for this fragment.
         val rootView = inflater.inflate(R.layout.fragment_settings, container, false)
 
-        var initialX = 0f
-
-        rootView.setOnTouchListener { view, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    initialX = event.x
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    view.performClick()
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    val currentX = event.x
-                    val deltaX = currentX - initialX
-
-                    if (abs(deltaX) > 100) {
-                        if (deltaX > 0 && !MainActivity.isDrawerOpen) {
-                            switchDrawer()
-                        } else if (deltaX < 0 && MainActivity.isDrawerOpen) {
-                            switchDrawer()
-                        }
-                    }
-
-                    true
-                }
-                else -> false
-            }
-        }
-
         if (isAkaneVisible) {
             rootView.findViewById<ImageView>(R.id.akane).visibility = VISIBLE
         }
@@ -117,6 +71,7 @@ class SettingsFragment : Fragment() {
         // Define the topAppBar behavior.
         val topAppBar = rootView.findViewById<MaterialToolbar>(R.id.topAppBar)
         val versionTag = rootView.findViewById<TextView>(R.id.version_tag)
+        val contributors = rootView.findViewById<TextView>(R.id.contributors)
         val cacheSwitch = rootView.findViewById<MaterialSwitch>(R.id.cache_reading_switch)
         val colorfulButtonSwitch = rootView.findViewById<MaterialSwitch>(R.id.home_colorful_button)
         val reorderSwitch = rootView.findViewById<MaterialSwitch>(R.id.reading_order_switch)
@@ -130,6 +85,10 @@ class SettingsFragment : Fragment() {
             rootView.findViewById<MaterialSwitch>(R.id.enable_list_shuffle)
         val enableSquigglyProgressbarSwitch =
             rootView.findViewById<MaterialSwitch>(R.id.enable_squiggly_progress_bar)
+
+        val contributorString = getString(R.string.settings_contributors_content) + ' ' +
+                getString(R.string.settings_contributors_content_alphabet)
+        contributors.text = contributorString
 
         cacheSwitch.isChecked = isGlideCacheEnabled
         colorfulButtonSwitch.isChecked = isColorfulButtonEnabled

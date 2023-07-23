@@ -21,6 +21,7 @@ package org.akanework.symphonica
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -29,6 +30,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
@@ -39,6 +42,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -85,6 +89,7 @@ import org.akanework.symphonica.logic.util.broadcastSliderSeek
 import org.akanework.symphonica.logic.util.convertDurationToTimeStamp
 import org.akanework.symphonica.logic.util.nextSong
 import org.akanework.symphonica.logic.util.prevSong
+import org.akanework.symphonica.logic.util.px
 import org.akanework.symphonica.logic.util.sortAlbumListByTrackNumber
 import org.akanework.symphonica.logic.util.thisSong
 import org.akanework.symphonica.logic.util.userChangedPlayerStatus
@@ -293,12 +298,11 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize loading sequence.
         coroutineScope.launch {
-            loadDataFromDisk()
+            if (libraryViewModel.librarySongList.isEmpty()) {
+                loadDataFromDisk()
+            }
 
             if (!isForceLoadingEnabled) {
-                // Look, listen.
-                // I know what you're thinking.
-                // Let me explain. Go to sortAlbumListByTrackNumber's define page.
                 withContext(Dispatchers.IO) {
                     libraryViewModel.librarySortedAlbumList = sortAlbumListByTrackNumber(
                         libraryViewModel.libraryAlbumList
@@ -312,6 +316,7 @@ class MainActivity : AppCompatActivity() {
 
         // Find the views.
         val bottomSheetNextButton = findViewById<MaterialButton>(R.id.bottom_sheet_next)
+        val fullSheetBackButton = findViewById<MaterialButton>(R.id.sheet_extract_player)
         val fullSheetNextButton = findViewById<MaterialButton>(R.id.sheet_next_song)
         val fullSheetPrevButton = findViewById<MaterialButton>(R.id.sheet_previous_song)
 
@@ -337,20 +342,27 @@ class MainActivity : AppCompatActivity() {
         playerBottomSheetBehavior =
                 BottomSheetBehavior.from(findViewById(R.id.standard_bottom_sheet))
 
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            val params = window.attributes
+            params.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            window.attributes = params
+        }
+
         checkIfSquigglyProgressBarEnabled()
         if (isSquigglyProgressBarEnabled) {
             trackSquigglyProgressBar()
         }
 
         // Initialize the animator. (Since we can't acquire fragmentContainer inside switchDrawer.)
-        animator = ValueAnimator.ofFloat(0f, 600f)
+        animator = ValueAnimator.ofFloat(0f, NAVIGATION_VIEW_WIDTH.px.toFloat())
         animator.addUpdateListener { animation ->
             fragmentContainerView.translationX = animation.animatedValue as Float
         }
         animator.interpolator = AccelerateDecelerateInterpolator()
         animator.duration = DRAWER_ANIMATION_DURATION
 
-        animatorReverse = ValueAnimator.ofFloat(600f, 0f)
+        animatorReverse = ValueAnimator.ofFloat(NAVIGATION_VIEW_WIDTH.px.toFloat(), 0f)
         animatorReverse.addUpdateListener { animation ->
             fragmentContainerView.translationX = animation.animatedValue as Float
         }
@@ -501,6 +513,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        fullSheetBackButton.setOnClickListener {
+            playerBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+
+            ObjectAnimator.ofFloat(bottomFullSizePlayerPreview, "alpha", 1f, 0f)
+                .setDuration(FULL_PLAYER_FADE_ANIMATION_DURATION)
+                .start()
+
+            bottomPlayerPreview.visibility = VISIBLE
+        }
+
         findViewById<ImageView>(R.id.sheet_cover).setOnLongClickListener {
             val rootView = MaterialAlertDialogBuilder(
                 this,
@@ -558,6 +580,9 @@ class MainActivity : AppCompatActivity() {
                 } else if (newState == BottomSheetBehavior.STATE_DRAGGING) {
                     bottomFullSizePlayerPreview.visibility = VISIBLE
                     bottomPlayerPreview.visibility = VISIBLE
+                    if (isSquigglyProgressBarEnabled) {
+                        trackSquigglyProgressBar()
+                    }
                 } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                     bottomPlayerPreview.visibility = GONE
                     controllerViewModel.isBottomSheetOpen = true
@@ -853,7 +878,7 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             bottomSheetControlButton.icon =
                     ContextCompat.getDrawable(SymphonicaApplication.context, R.drawable.ic_sheet_play)
-            fullSheetControlButton.icon = ContextCompat.getDrawable(SymphonicaApplication.context, R.drawable.ic_sheet_play)
+            fullSheetControlButton.icon = ContextCompat.getDrawable(SymphonicaApplication.context, R.drawable.ic_refresh)
             fullSheetSlider.isEnabled = false
             fullSheetSlider.value = 0f
             fullSheetTimeStamp.text = convertDurationToTimeStamp("0")
@@ -1051,6 +1076,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
+        var currentMusicDrawable: Bitmap? = null
+
         var isMainActivityActive: Boolean? = null
         var isDBSafe = false
         private val historyDatabase = Room.databaseBuilder(
@@ -1073,7 +1100,7 @@ class MainActivity : AppCompatActivity() {
 
         // This is drawer needed in companion functions to decide
         // whether the drawer is open.
-        var isDrawerOpen = false
+        private var isDrawerOpen = false
 
         // Below is the custom variables that can be changed throughout
         // the settings.

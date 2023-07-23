@@ -21,76 +21,65 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="bottom"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:background="?attr/colorSurface">
 
     <FrameLayout
-        android:id="@+id/standard_bottom_sheet"
-        style="@style/StandardBottomSheetDialog"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:behavior_peekHeight="@dimen/bottom_sheet_height"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+        android:layout_height="match_parent">
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:layout_width="0dp"
+            android:layout_height="0dp">
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/bottom_player"
+                android:orientation="horizontal"
+                android:visibility="gone" />
+            <FrameLayout
+                android:id="@+id/standard_bottom_sheet"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone"
+                app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+                android:orientation="horizontal" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:id="@+id/full_size_sheet_player"
+                android:orientation="horizontal"
+                android:visibility="gone" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/sheet_extract_player"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone" />
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
         <LinearLayout
-            android:id="@+id/full_size_sheet_player"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="32dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    android:paddingTop="16dp">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="48dp">
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/sheet_extract_player"
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:backgroundTint="?attr/colorSurface"
-                            android:elevation="0dp"
-                            android:insetLeft="0dp"
-                            android:insetTop="0dp"
-                            android:insetRight="0dp"
-                            android:insetBottom="0dp"
-                            app:icon="@drawable/ic_expand_more"
-                            app:iconGravity="textStart"
-                            app:iconPadding="0dp"
-                            app:iconSize="30sp"
-                            app:iconTint="?attr/colorOnSurface" />
-
-                    </LinearLayout>
-
-                </FrameLayout>
+            android:orientation="horizontal"
+            android:visibility="visible"
+            android:baselineAligned="false">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="36dp"
-                    android:layout_marginLeft="18dp"
-                    android:layout_marginRight="18dp">
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:clipChildren="false">
 
                     <com.google.android.material.card.MaterialCardView
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="12dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintDimensionRatio="H,1:1"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:strokeWidth="0dp">
+                        style="?attr/materialCardViewElevatedStyle">
 
                         <ImageView
                             android:layout_width="match_parent"
@@ -110,16 +99,16 @@
                             android:id="@+id/sheet_cover"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
                             android:contentDescription="@string/desc_album_cover" />
 
                     </com.google.android.material.card.MaterialCardView>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-            </LinearLayout>
-
             <FrameLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
@@ -233,12 +222,6 @@
                         android:layout_marginTop="12dp"
                         android:paddingLeft="20dp"
                         android:paddingRight="20dp">
-
-                    <LinearLayout
-                        android:layout_gravity="center"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -373,8 +356,6 @@
 
                         </LinearLayout>
 
-                    </LinearLayout>
-
                     </FrameLayout>
 
                 </LinearLayout>
@@ -459,10 +440,10 @@
         </LinearLayout>
 
         <FrameLayout
-            android:id="@+id/bottom_player"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp">
+            android:layout_marginTop="12dp"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="wrap_content"
